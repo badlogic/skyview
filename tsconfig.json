@@ -1,0 +1,10 @@
+{
+    "compilerOptions": {
+        "target": "ES6",
+        "module": "CommonJS",
+        "strict": true,
+        "lib": ["es2021", "dom"],
+        "esModuleInterop": true,
+        "experimentalDecorators": true
+    }
+}

@@ -1,2 +1,3 @@
 # skyview
-Thread reader for Bluesky
+
+A Bluesky thread reader.

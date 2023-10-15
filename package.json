@@ -1,0 +1,51 @@
+{
+  "name": "skyview",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "prepare": "husky install",
+    "format": "npx prettier --write .",
+    "clean": "rimraf build",
+    "build:css": "npx tailwindcss -i styles.css -o styles-bundle.css",
+    "build:css-txt": "npx tailwindcss -i styles.css -o styles-bundle.css.txt",
+    "build:site": "node ./esbuild.site.mjs",
+    "build:server": "node ./esbuild.server.mjs",
+    "dev": "concurrently \"npm run clean\" \"npm run server\" \"npx live-server . --cors --watch . --no-browser\" \"npm run build:site -- --watch\" \"npm run build:css -- --watch\" \"npm run build:css-txt -- --watch\"",
+    "build": "npm run clean && npm run build:css && npm run build:css-txt && npm run build:site && npm run build:server",
+    "server": "npm run build:server && PORT=3333 node --max_old_space_size=8192 --trace-warnings build/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/badlogic/skyview.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/badlogic/skyview/issues"
+  },
+  "homepage": "https://github.com/badlogic/skyview#readme",
+  "dependencies": {
+    "axios": "^1.4.0",
+    "compression": "^1.7.4",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "husky": "^8.0.3",
+    "lit": "^2.8.0",
+    "lit-html": "^2.8.0",
+    "openai": "^4.11.1"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.7.3",
+    "@types/cors": "^2.8.14",
+    "@types/express": "^4.17.18",
+    "autoprefixer": "^10.4.14",
+    "concurrently": "^8.1.0",
+    "esbuild": "^0.17.19",
+    "live-server": "^1.2.2",
+    "postcss": "^8.4.24",
+    "prettier": "^2.8.8",
+    "pretty-quick": "^3.1.3",
+    "rimraf": "^5.0.5",
+    "tailwindcss": "^3.3.2"
+  }
+}
