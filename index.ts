@@ -32,7 +32,7 @@ function getTimeDifferenceString(inputDate: string): string {
 }
 
 @customElement("skyview-popup")
-export class Popup extends LitElement {
+class Popup extends LitElement {
     static styles = globalStyles;
 
     @property()
@@ -108,7 +108,22 @@ function renderGallery(images: BskyImage[], expandGallery = false): HTMLElement 
     return galleryDom;
 }
 
-export const agent = new Agent({ serviceUri: "https://api.bsky.app" });
+function renderCard(card: BskyExternalCard) {
+    return html` <a href="${card.uri}" class="inline-block w-full border border-gray/50 rounded">
+        <div class="flex">
+            ${card.thumb
+                ? html`<div class="flex-none"><img src="${card.thumb}" class="!w-[6.5em] !max-h-full !h-full !object-cover !rounded-r-none" /></div>`
+                : nothing}
+            <div class="flex flex-col overflow-hidden text-ellipsis p-4">
+                <span class="font-bold text-sm text-color text-ellipsis overflow-hidden">${card.title}</span>
+                <span class="py-2 text-color text-sm text-ellipsis overflow-hidden">${card.description.split("\n")[0]}</span>
+                <span class="text-xs text-color/50 text-ellipsis overflow-hidden">${new URL(card.uri).host}</span>
+            </div>
+        </div>
+    </a>`;
+}
+
+const agent = new Agent({ serviceUri: "https://api.bsky.app" });
 
 type BskyAuthor = {
     did: string;
@@ -132,11 +147,18 @@ type BskyImage = {
     thumb: string;
 };
 
-type BskyQuotedPostRecord = {
+type BskyQuotedPost = {
     author: BskyAuthor;
     cid: string;
     uri: string;
     value: BskyRecord;
+};
+
+type BskyExternalCard = {
+    uri: string;
+    description: string;
+    thumb: string;
+    title: string;
 };
 
 type BskyPost = {
@@ -149,8 +171,9 @@ type BskyPost = {
         repostCount: number;
         record: BskyRecord;
         embed?: {
-            record?: BskyQuotedPostRecord;
+            record?: BskyQuotedPost;
             images?: BskyImage[];
+            external?: BskyExternalCard;
         };
     };
     replies: BskyPost[];
@@ -171,7 +194,7 @@ const contentLoader = html`<div class="flex space-x-4 animate-pulse w-[80%] max-
 </div>`;
 
 @customElement("skyview-app")
-export class App extends LitElement {
+class App extends LitElement {
     static styles = [globalStyles];
 
     @query("#url")
@@ -285,7 +308,7 @@ export class App extends LitElement {
         return html`<main class="flex flex-col justify-between m-auto max-w-[600px] px-4 h-full">
             <a class="text-2xl text-primary font-bold text-center my-4" href="/">Skyview</a>
             <div class="flex-grow flex flex-col">${content}</div>
-            <div class="text-center italic my-4 mb-8">
+            <div class="text-center italic my-4 pb-4">
                 Lovingly made by <a class="text-primary" href="https://bsky.app/profile/badlogic.bsky.social">Mario Zechner</a><br />
                 No data is collected, not even your IP address.
                 <a class="text-primary" href="https://github.com/badlogic/skyview"><br />Source code</a>
@@ -319,6 +342,7 @@ export class App extends LitElement {
 
         const quotedPost = post.post.embed?.record;
         const images = post.post.embed?.images ? renderGallery(post.post.embed.images) : undefined;
+        const card = post.post.embed?.external ? renderCard(post.post.embed.external) : undefined;
 
         return html`<div>
             <div class="flex flex-col mt-4">
@@ -328,6 +352,7 @@ export class App extends LitElement {
                           ${recordPartial(quotedPost.author!, quotedPost.uri, quotedPost.value, true)}
                       </div>`
                     : nothing}
+                ${card ? card : nothing}
             </div>
             ${post.replies.length > 0
                 ? html`<div class="border-l border-dotted border-gray/50 pl-4">${map(post.replies, (reply) => this.postPartial(reply))}</div>`

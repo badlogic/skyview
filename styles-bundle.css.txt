@@ -639,6 +639,10 @@ html,
   margin-bottom: 1rem;
 }
 
+.mb-8 {
+  margin-bottom: 2rem;
+}
+
 .ml-2 {
   margin-left: 0.5rem;
 }
@@ -659,12 +663,12 @@ html,
   margin-top: 1rem;
 }
 
-.mb-8 {
-  margin-bottom: 2rem;
-}
-
 .block {
   display: block;
+}
+
+.inline-block {
+  display: inline-block;
 }
 
 .inline {
@@ -691,6 +695,10 @@ html,
   display: none;
 }
 
+.\!h-full {
+  height: 100% !important;
+}
+
 .h-10 {
   height: 2.5rem;
 }
@@ -705,6 +713,14 @@ html,
 
 .h-full {
   height: 100%;
+}
+
+.\!max-h-full {
+  max-height: 100% !important;
+}
+
+.\!w-\[6\.5em\] {
+  width: 6.5em !important;
 }
 
 .w-10 {
@@ -723,6 +739,10 @@ html,
   width: 80%;
 }
 
+.w-full {
+  width: 100%;
+}
+
 .max-w-\[300px\] {
   max-width: 300px;
 }
@@ -733,6 +753,10 @@ html,
 
 .flex-1 {
   flex: 1 1 0%;
+}
+
+.flex-none {
+  flex: none;
 }
 
 .flex-grow {
@@ -815,10 +839,18 @@ html,
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
 }
 
+.overflow-hidden {
+  overflow: hidden;
+}
+
 .truncate {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.text-ellipsis {
+  text-overflow: ellipsis;
 }
 
 .rounded {
@@ -827,6 +859,11 @@ html,
 
 .rounded-full {
   border-radius: 9999px;
+}
+
+.\!rounded-r-none {
+  border-top-right-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
 }
 
 .rounded-l {
@@ -884,6 +921,11 @@ html,
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
+.\!object-cover {
+  -o-object-fit: cover !important;
+     object-fit: cover !important;
+}
+
 .p-1 {
   padding: 0.25rem;
 }
@@ -921,6 +963,10 @@ html,
   padding-bottom: 1rem;
 }
 
+.pb-4 {
+  padding-bottom: 1rem;
+}
+
 .pl-2 {
   padding-left: 0.5rem;
 }
@@ -936,6 +982,11 @@ html,
 .text-2xl {
   font-size: 1.5rem;
   line-height: 2rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
 }
 
 .text-xs {
