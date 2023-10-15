@@ -10,9 +10,9 @@
     "build:css-txt": "npx tailwindcss -i styles.css -o styles-bundle.css.txt",
     "build:site": "node ./esbuild.site.mjs",
     "build:server": "node ./esbuild.server.mjs",
-    "dev": "concurrently \"npm run clean\" \"npm run server\" \"npx live-server . --cors --watch . --no-browser\" \"npm run build:site -- --watch\" \"npm run build:css -- --watch\" \"npm run build:css-txt -- --watch\"",
+    "dev": "concurrently \"PORT=3333 node --watch build/server.js\" \"npx live-server . --cors --watch . --no-browser\" \"npm run build:site -- --watch\" \"npm run build:css -- --watch\" \"npm run build:css-txt -- --watch\" \"npm run build:server -- --watch\"",
     "build": "npm run clean && npm run build:css && npm run build:css-txt && npm run build:site && npm run build:server",
-    "server": "npm run build:server && PORT=3333 node --max_old_space_size=8192 --trace-warnings build/server.js"
+    "server": "PORT=3333 node --max_old_space_size=8192 --trace-warnings build/server.js"
   },
   "repository": {
     "type": "git",
@@ -25,6 +25,8 @@
   },
   "homepage": "https://github.com/badlogic/skyview#readme",
   "dependencies": {
+    "@atproto/api": "^0.6.20",
+    "@intrnl/bluesky-client": "^0.2.5",
     "axios": "^1.4.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
@@ -42,6 +44,7 @@
     "concurrently": "^8.1.0",
     "esbuild": "^0.17.19",
     "live-server": "^1.2.2",
+    "nodemon": "^3.0.1",
     "postcss": "^8.4.24",
     "prettier": "^2.8.8",
     "pretty-quick": "^3.1.3",
