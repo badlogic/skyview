@@ -3,9 +3,9 @@ import express from "express";
 import * as http from "http";
 import cors from "cors"; // Import the cors middleware
 
-const port = process.env.PORT;
+const port = process.env.PORT ?? 3333;
 const blueskyAccount = process.env.SKYVIEW_BLUESKY_ACCOUNT;
-const blueskyKey = process.env.SKYVIEW_BLUESKY_KEY;
+const blueskyKey = process.env.SKYVIEW_BLUESKY_PASSWORD;
 
 console.log(`BlueSky account: ${blueskyAccount}`);
 console.log(`BlueSky key: ${blueskyKey}`);
