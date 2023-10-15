@@ -211,6 +211,9 @@ class App extends LitElement {
     @state()
     thread?: BskyPost;
 
+    @state()
+    copiedToClipboard = false;
+
     constructor() {
         super();
         this.url = new URL(location.href).searchParams.get("url");
@@ -289,20 +292,55 @@ class App extends LitElement {
                     href="https://bsky.app/profile/${this.thread.post.author.did}/post/${this.thread.post.uri.replace("at://", "").split("/")[2]}"
                     >View thread on BlueSky</a
                 >
+                <div class="mb-4 font-bold text-primary text-center cursor-pointer" @click=${() => this.copyToClipboard(location.href)}>
+                    ${this.copiedToClipboard ? "Copied link to clipboard" : "Share"}
+                </div>
                 ${this.postPartial(this.thread)}`;
         } else {
             content = html`<div class="text-center">
-                    View and share <a class="text-primary font-bold" href="https://bsky.app">BlueSky</a> threads.
+                    View and share <a class="text-primary font-bold" href="https://bsky.app">BlueSky</a> threads without needing a BlueSky account.
                 </div>
                 <div class="flex mt-4">
                     <input
                         id="url"
                         class="flex-1 bg-black border border-gray/75 outline-none rounded-l px-2 py-2"
-                        placeholder="Link to a post in a Bluesky thread"
-                        value="https://bsky.app/profile/katquat.bsky.social/post/3kbssygzj632a"
+                        placeholder="URL of a BlueSky post"
                     />
                     <button class="align-center rounded-r bg-primary text-white px-4" @click=${this.viewPosts}>View</button>
-                </div>`;
+                </div>
+                <div class="text-center text-bold text-xl mt-8 mb-4">How it works</div>
+                <div>1. Open a post in the BlueSky app or on the BlueSky website</div>
+                <div>2. Click the three dots</div>
+                <div>3. Click "Share" and copy the URL</div>
+                <img class="rounded border border-gray/50 m-2" src="tutorial.png" />
+                <div>4. Paste the URL into the text field above and click "View"</div>
+                <div>5. View the thread and share it by clicking "Share"</div>
+                <div class="text-center text-bold text-xl mt-8 mb-4">Privacy (or lack thereof)</div>
+                <p>
+                    By design, all your BlueSky posts are available to anyone with an internet connection. They do not even need a BlueSky account to
+                    view all your posts (and images). All they need is your BlueSky user name. This is by design. There is no privacy on BlueSky.
+                </p>
+                <p class="mt-4">
+                    Here's a
+                    <a class="text-primary" href="https://bsky.app/profile/badlogic.bsky.social/post/3kbt22jdyuw2l">post of mine on BlueSky</a>.
+                    You'll need an account to view it on the BlueSky website or in the BlueSky app.
+                </p>
+                <p class="mt-4">
+                    And here is the
+                    <a
+                        class="text-primary"
+                        href="https://bsky.social/xrpc/com.atproto.repo.getRecord?repo=badlogic.bsky.social&collection=app.bsky.feed.post&rkey=3kbt22jdyuw2l"
+                        >same post, publically available to anyone with an internet connection</a
+                    >. Yes, it reads like gibberish, but computer people can take this data and reconstruct all of the post's information. That's
+                    essentially what Skyview does. Without needing a BlueSky account. Here is the
+                    <a class="text-primary" href="/?url=https%3A%2F%2Fbsky.app%2Fprofile%2Fbadlogic.bsky.social%2Fpost%2F3kbt22jdyuw2l"
+                        >same post viewed via Skyview</a
+                    >.
+                </p>
+                <p class="mt-4">
+                    Skyview runs directly in your browser. Everything you do happens directly on your device. Skyview does not collect any data
+                    whatsovever. It also does not store any data users are viewing through it, such as post text, images, etc.
+                </p>`;
         }
 
         return html`<main class="flex flex-col justify-between m-auto max-w-[600px] px-4 h-full">
@@ -358,5 +396,22 @@ class App extends LitElement {
                 ? html`<div class="border-l border-dotted border-gray/50 pl-4">${map(post.replies, (reply) => this.postPartial(reply))}</div>`
                 : nothing}
         </div>`;
+    }
+
+    copyToClipboard(text: string) {
+        const input = document.createElement("input");
+        input.value = text;
+
+        document.body.appendChild(input);
+        input.select();
+
+        try {
+            document.execCommand("copy");
+            this.copiedToClipboard = true;
+        } catch (err) {
+            this.copiedToClipboard = false;
+        } finally {
+            document.body.removeChild(input);
+        }
     }
 }
