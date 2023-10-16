@@ -357,8 +357,6 @@ class App extends LitElement {
 
     viewType: ViewType = "tree";
 
-    scrollToElement?: HTMLElement;
-
     @property()
     embed = false;
 
@@ -487,13 +485,6 @@ class App extends LitElement {
         }
     }
 
-    protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-        if (this.scrollToElement) {
-            this.scrollToElement?.scrollIntoView({ behavior: "smooth", block: "center" });
-            this.scrollToElement = undefined;
-        }
-    }
-
     render() {
         let content: TemplateResult = html``;
         if (this.loading) {
@@ -501,7 +492,6 @@ class App extends LitElement {
         } else if (this.error) {
             content = html`<div class="border border-gray bg-gray text-white p-4 rounded text-center">Error: ${this.error}</div>`;
         } else if (this.thread) {
-            this.scrollToElement = undefined;
             content = html` ${!this.embed
                 ? html`<div class="mb-4 font-bold text-primary text-center cursor-pointer" @click=${() => this.copyToClipboard(location.href)}>
                           ${this.copiedToClipboard ? "Copied link to clipboard" : "Share"}
@@ -719,9 +709,6 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                 : nothing}
         </div>`)[0];
 
-        if (post.post.uri == originalUri) {
-            this.scrollToElement = postDom.children[0] as HTMLElement;
-        }
         return postDom;
     }
 
