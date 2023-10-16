@@ -638,9 +638,28 @@ html,
   margin: auto;
 }
 
+.mx-4 {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .my-4 {
   margin-top: 1rem;
   margin-bottom: 1rem;
+}
+
+.my-8 {
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
 }
 
 .mb-4 {
@@ -661,6 +680,10 @@ html,
 
 .mt-1 {
   margin-top: 0.25rem;
+}
+
+.mt-16 {
+  margin-top: 4rem;
 }
 
 .mt-2 {
@@ -731,6 +754,10 @@ html,
   max-height: 100% !important;
 }
 
+.max-h-\[70vh\] {
+  max-height: 70vh;
+}
+
 .\!w-\[6\.5em\] {
   width: 6.5em !important;
 }
@@ -755,12 +782,16 @@ html,
   width: 100%;
 }
 
+.min-w-\[280px\] {
+  min-width: 280px;
+}
+
 .max-w-\[300px\] {
   max-width: 300px;
 }
 
-.max-w-\[600px\] {
-  max-width: 600px;
+.max-w-\[728px\] {
+  max-width: 728px;
 }
 
 .flex-1 {
@@ -777,6 +808,10 @@ html,
 
 .grow {
   flex-grow: 1;
+}
+
+.grow-0 {
+  flex-grow: 0;
 }
 
 .border-collapse {
@@ -803,6 +838,10 @@ html,
 
 .resize {
   resize: both;
+}
+
+.list-disc {
+  list-style-type: disc;
 }
 
 .grid-cols-3 {
@@ -851,6 +890,10 @@ html,
   margin-bottom: calc(1.5rem * var(--tw-space-y-reverse));
 }
 
+.overflow-auto {
+  overflow: auto;
+}
+
 .overflow-hidden {
   overflow: hidden;
 }
@@ -892,8 +935,28 @@ html,
   border-width: 1px;
 }
 
+.border-b {
+  border-bottom-width: 1px;
+}
+
 .border-l {
   border-left-width: 1px;
+}
+
+.border-r {
+  border-right-width: 1px;
+}
+
+.border-r-2 {
+  border-right-width: 2px;
+}
+
+.border-r-4 {
+  border-right-width: 4px;
+}
+
+.border-t {
+  border-top-width: 1px;
 }
 
 .border-dotted {
@@ -911,6 +974,11 @@ html,
 
 .border-gray\/75 {
   border-color: rgb(85 85 85 / 0.75);
+}
+
+.border-primary {
+  --tw-border-opacity: 1;
+  border-color: rgb(204 125 36 / var(--tw-border-opacity));
 }
 
 .bg-black {
@@ -987,8 +1055,20 @@ html,
   padding-left: 1rem;
 }
 
+.pr-2 {
+  padding-right: 0.5rem;
+}
+
 .text-center {
   text-align: center;
+}
+
+.align-top {
+  vertical-align: top;
+}
+
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .text-2xl {
@@ -1119,4 +1199,8 @@ html,
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+}
+
+.hover\:bg-gray\/20:hover {
+  background-color: rgb(85 85 85 / 0.2);
 }

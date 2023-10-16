@@ -30,6 +30,7 @@
     "axios": "^1.4.0",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
+    "easy-bsky-bot-sdk": "^0.1.2",
     "express": "^4.18.2",
     "husky": "^8.0.3",
     "lit": "^2.8.0",
