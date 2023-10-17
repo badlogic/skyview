@@ -7,6 +7,7 @@ import { map } from "lit-html/directives/map.js";
 import { Agent } from "@intrnl/bluesky-client/agent";
 // @ts-ignore
 import type { DID } from "@intrnl/bluesky-client/atp-schema";
+import { RichText } from "@atproto/api";
 
 function getTimeDifferenceString(inputDate: string): string {
     const currentDate = new Date();
@@ -41,45 +42,34 @@ function replaceHandles(text: string): string {
     return replacedText;
 }
 
-function applyFacets(record: BskyRecord): string {
+function applyFacets(record: BskyRecord) {
     if (!record.facets) {
         return record.text;
     }
 
-    let modifiedText = record.text;
+    const rt = new RichText({
+        text: record.text,
+        facets: record.facets as any,
+    });
 
-    const sortedFacets = record.facets.sort((a, b) => a.index.byteStart - b.index.byteStart);
+    const text: string[] = [];
 
-    for (const facet of sortedFacets) {
-        if (facet.features[0].tag) {
-            facet.index.byteStart--;
-        }
-        const facetText = modifiedText.slice(facet.index.byteStart, facet.index.byteEnd);
-        const replacements = facet.features.map((feature) => {
-            const { uri, tag } = feature;
-            return `<a class="text-primary" href="${uri || ""}" tag="${tag || ""}">${facetText}</a>`;
-        });
-
-        const facetStart = facet.index.byteStart;
-        const facetEnd = facet.index.byteEnd;
-
-        // Replace the facet in the modifiedText
-        modifiedText = modifiedText.slice(0, facetStart) + replacements.join("") + modifiedText.slice(facetEnd);
-
-        // Adjust byteStart and byteEnd for subsequent facets
-        const diff = replacements.join("").length - (facetEnd - facetStart) - 1;
-        for (const nextFacet of sortedFacets) {
-            if (nextFacet.index.byteStart > facetEnd) {
-                nextFacet.index.byteStart += diff;
-                nextFacet.index.byteEnd += diff;
-            }
+    for (const segment of rt.segments()) {
+        if (segment.isMention()) {
+            text.push(`<a class="text-primary" href="https:///profile/${segment.mention?.did}">${segment.text}</a>`);
+        } else if (segment.isLink()) {
+            text.push(`<a class="text-primary" href="${segment.link?.uri}">${segment.text}</a>`);
+        } else if (segment.isTag()) {
+            text.push(`<span class="text-blue-500">${segment.text}</span>`);
+        } else {
+            text.push(segment.text);
         }
     }
-
-    return modifiedText;
+    const result = text.join("");
+    return result;
 }
 function processText(record: BskyRecord) {
-    return replaceHandles(applyFacets(record)).replaceAll("\n", "<br/>");
+    return replaceHandles(applyFacets(record)).trim().replaceAll("\n", "<br/>");
 }
 
 @customElement("radio-button-group")
@@ -167,13 +157,13 @@ function dom(template: TemplateResult, container?: HTMLElement | DocumentFragmen
     return children as HTMLElement[];
 }
 
-function renderGallery(images: BskyImage[], expandGallery = false): HTMLElement {
+function renderGallery(images: BskyImage[], expandGallery = true): HTMLElement {
     const galleryDom = dom(html`
         <div class="flex flex-col gap-2 mt-2">
             ${images.map(
                 (img, index) => html`
                     <div class="relative flex flex-col items-center ${index && !expandGallery ? "hidden" : ""}">
-                        <img class="max-h-[70vh]" src="${img.thumb}" alt="${img.alt}" ) />
+                        <img class="max-h-[70vh] border border-none rounded" src="${img.thumb}" alt="${img.alt}" ) />
                         ${img.alt && img.alt.length > 0
                             ? html`<skyview-popup buttonText="ALT" text="${img.alt}" class="absolute left-1 bottom-1 cursor-pointer">
                                   <div class="w-[350px]">${img.alt}</div>
@@ -470,9 +460,11 @@ class App extends LitElement {
                 }
                 this.thread.replies = posts.length > 1 ? posts.slice(1, posts.length) : [];
                 this.thread.replies.forEach((reply) => (reply.replies = []));
-                const lastPost = this.thread.replies[this.thread.replies.length - 1];
-                if (lastPost.post.record.text.includes("@skyview.social") && lastPost.post.record.text.includes("unroll")) {
-                    this.thread.replies.pop();
+                if (this.thread.replies.length > 0) {
+                    const lastPost = this.thread.replies[this.thread.replies.length - 1];
+                    if (lastPost.post.record.text.includes("@skyview.social") && lastPost.post.record.text.includes("unroll")) {
+                        this.thread.replies.pop();
+                    }
                 }
             }
 
@@ -582,7 +574,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                             or blog to embed the post.
                             <a
                                 class="text-primary"
-                                href="http://localhost:8080/?url=https%3A%2F%2Fbsky.app%2Fprofile%2Fbadlogic.bsky.social%2Fpost%2F3kbshkdcqdz2h&viewtype=embed"
+                                href="?url=https%3A%2F%2Fbsky.app%2Fprofile%2Fbadlogic.bsky.social%2Fpost%2F3kbshkdcqdz2h&viewtype=embed"
                                 >Example</a
                             >
                         </div>

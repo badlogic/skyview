@@ -963,6 +963,10 @@ html,
   border-style: dotted;
 }
 
+.border-none {
+  border-style: none;
+}
+
 .border-gray {
   --tw-border-opacity: 1;
   border-color: rgb(85 85 85 / var(--tw-border-opacity));
@@ -1110,6 +1114,11 @@ html,
 .ordinal {
   --tw-ordinal: ordinal;
   font-variant-numeric: var(--tw-ordinal) var(--tw-slashed-zero) var(--tw-numeric-figure) var(--tw-numeric-spacing) var(--tw-numeric-fraction);
+}
+
+.text-blue-500 {
+  --tw-text-opacity: 1;
+  color: rgb(59 130 246 / var(--tw-text-opacity));
 }
 
 .text-gray {
