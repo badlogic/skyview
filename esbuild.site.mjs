@@ -7,6 +7,7 @@ let watch = process.argv.length >= 3 && process.argv[2] == "--watch";
 const config = {
     entryPoints: {
         index: "index.ts",
+        widget: "widget.ts",
     },
     bundle: true,
     sourcemap: true,

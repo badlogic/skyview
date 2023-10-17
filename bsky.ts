@@ -82,6 +82,20 @@ export type BskyThreadPost = {
     replies: BskyThreadPost[];
 };
 
+export type OEmbed = {
+    url: string;
+    author_name: string;
+    author_url: string;
+    html: string;
+    width: number | null;
+    height: number | null;
+    type: string;
+    cache_age: string;
+    provider_name: string;
+    provider_url: string;
+    version: string;
+};
+
 export type ViewType = "tree" | "embed" | "unroll";
 
 export async function loadThread(url: string, viewType: ViewType): Promise<{ thread: BskyThreadPost; originalUri: string | undefined } | string> {
