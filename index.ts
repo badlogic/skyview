@@ -36,7 +36,7 @@ function getTimeDifferenceString(inputDate: string): string {
 function replaceHandles(text: string): string {
     const handleRegex = /@([\p{L}_.-]+)/gu;
     const replacedText = text.replace(handleRegex, (match, handle) => {
-        return `<a class="text-primary" href="https://bsky.app/profile/${handle}">@${handle}</a>`;
+        return `<a class="text-primary" href="https://bsky.app/profile/${handle}" target="_blank">@${handle}</a>`;
     });
 
     return replacedText;
@@ -56,9 +56,9 @@ function applyFacets(record: BskyRecord) {
 
     for (const segment of rt.segments()) {
         if (segment.isMention()) {
-            text.push(`<a class="text-primary" href="https:///profile/${segment.mention?.did}">${segment.text}</a>`);
+            text.push(`<a class="text-primary" href="https:///profile/${segment.mention?.did}" target="_blank">${segment.text}</a>`);
         } else if (segment.isLink()) {
-            text.push(`<a class="text-primary" href="${segment.link?.uri}">${segment.text}</a>`);
+            text.push(`<a class="text-primary" href="${segment.link?.uri}" target="_blank">${segment.text}</a>`);
         } else if (segment.isTag()) {
             text.push(`<span class="text-blue-500">${segment.text}</span>`);
         } else {
@@ -212,7 +212,7 @@ function renderGallery(images: BskyImage[], expandGallery = true): HTMLElement {
 }
 
 function renderCard(card: BskyExternalCard) {
-    return html` <a href="${card.uri}" class="inline-block w-full border border-gray/50 rounded mt-2">
+    return html` <a href="${card.uri}" class="inline-block w-full border border-gray/50 rounded mt-2" target="_blank">
         <div class="flex">
             ${card.thumb
                 ? html`<div class="flex-none"><img src="${card.thumb}" class="!w-[6.5em] !max-h-full !h-full !object-cover !rounded-r-none" /></div>`
@@ -470,7 +470,7 @@ class App extends LitElement {
 
             console.log(this.thread);
         } catch (e) {
-            this.error = "Sorry, couldn't load thread (exception)";
+            this.error = `Sorry, couldn't load thread (exception) ${(e as any).message ? "\n" + (e as any).message : ""}`;
             return;
         } finally {
             this.loading = false;
@@ -521,7 +521,8 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                 : this.postPartial(this.thread, this.viewType == "tree" ? this.originalUri : undefined)}`;
         } else {
             content = html`<div class="text-center">
-                    View and share <a class="text-primary font-bold" href="https://bsky.app">BlueSky</a> threads without needing a BlueSky account.
+                    View and share <a class="text-primary font-bold" href="https://bsky.app" target="_blank">BlueSky</a> threads without needing a
+                    BlueSky account.
                 </div>
                 <div class="flex mt-4">
                     <input
@@ -534,9 +535,9 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                 <div class="text-center text-bold text-xl mt-8 mb-4">How it works (BlueSky mobile & web app)</div>
                 <div class="flex flex-col gap-4">
                     <div class="mb-4">
-                        Reply anywhere in a BlueSky thread and mention <a href="https://bsky.app/profile/skyview.social">@skyview.social</a> using one
-                        of the following commands. The Skyview bot will reply to you with a link, which shows the BlueSky thread depending on your
-                        command.
+                        Reply anywhere in a BlueSky thread and mention
+                        <a href="https://bsky.app/profile/skyview.social" target="_blank">@skyview.social</a> using one of the following commands. The
+                        Skyview bot will reply to you with a link, which shows the BlueSky thread depending on your command.
                     </div>
                     <div class="flex flex-col gap-2">
                         <div>
@@ -547,6 +548,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                             <a
                                 class="text-primary"
                                 href="?url=https%3A%2F%2Fbsky.app%2Fprofile%2Fnroettgen.bsky.social%2Fpost%2F3kbu5y35yhl2u&viewtype=tree"
+                                target="_blank"
                                 >Example</a
                             >
                         </div>
@@ -561,6 +563,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                             <a
                                 class="text-primary"
                                 href="?url=https%3A%2F%2Fbsky.app%2Fprofile%2Fbadlogic.bsky.social%2Fpost%2F3kbt2y7pw272q&viewtype=unroll"
+                                target="_blank"
                                 >Example</a
                             >
                         </div>
@@ -575,6 +578,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                             <a
                                 class="text-primary"
                                 href="?url=https%3A%2F%2Fbsky.app%2Fprofile%2Fbadlogic.bsky.social%2Fpost%2F3kbshkdcqdz2h&viewtype=embed"
+                                target="_blank"
                                 >Example</a
                             >
                         </div>
@@ -598,18 +602,23 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                     </p>
                     <p>
                         Here's a
-                        <a class="text-primary" href="https://bsky.app/profile/badlogic.bsky.social/post/3kbt22jdyuw2l">post of mine on BlueSky</a>.
-                        You'll need an account to view it on the BlueSky website or in the BlueSky app.
+                        <a class="text-primary" href="https://bsky.app/profile/badlogic.bsky.social/post/3kbt22jdyuw2l" target="_blank"
+                            >post of mine on BlueSky</a
+                        >. You'll need an account to view it on the BlueSky website or in the BlueSky app.
                     </p>
                     <p>
                         And here is the
                         <a
                             class="text-primary"
                             href="https://bsky.social/xrpc/com.atproto.repo.getRecord?repo=badlogic.bsky.social&collection=app.bsky.feed.post&rkey=3kbt22jdyuw2l"
+                            target="_blank"
                             >same post, publically available to anyone with an internet connection</a
                         >. Yes, it reads like gibberish, but computer people can take this data and reconstruct all of the post's information. That's
                         essentially what Skyview does. Without needing a BlueSky account. Here is the
-                        <a class="text-primary" href="/?url=https%3A%2F%2Fbsky.app%2Fprofile%2Fbadlogic.bsky.social%2Fpost%2F3kbt22jdyuw2l"
+                        <a
+                            class="text-primary"
+                            href="/?url=https%3A%2F%2Fbsky.app%2Fprofile%2Fbadlogic.bsky.social%2Fpost%2F3kbt22jdyuw2l"
+                            target="_blank"
                             >same post viewed via Skyview</a
                         >.
                     </p>
@@ -657,11 +666,14 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
 
     recordPartial(author: BskyAuthor, uri: string, record: BskyRecord, isQuote = false) {
         return html`<div class="flex items-center gap-2">
-                <a class="flex items-center gap-2" href="https://bsky.app/profile/${author.handle ?? author.did}">
+                <a class="flex items-center gap-2" href="https://bsky.app/profile/${author.handle ?? author.did}" target="_blank">
                     ${author.avatar ? html`<img class="w-[2em] h-[2em] rounded-full" src="${author.avatar}" />` : this.defaultAvatar}
                     <span class="text-primary">${author.displayName}</span>
                 </a>
-                <a class="text-xs text-primary/75" href="https://bsky.app/profile/${author.did}/post/${uri.replace("at://", "").split("/")[2]}"
+                <a
+                    class="text-xs text-primary/75"
+                    href="https://bsky.app/profile/${author.did}/post/${uri.replace("at://", "").split("/")[2]}"
+                    target="_blank"
                     >${getTimeDifferenceString(record.createdAt)}</a
                 >
             </div>
@@ -705,8 +717,14 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
     }
 
     unroll(post: BskyThreadPost) {
-        const openPost = (url: string) => {
-            location.href = url;
+        const openPost = (ev: Event, url: string) => {
+            let el: HTMLElement | null = ev.target as HTMLElement;
+
+            while (el) {
+                if (el.tagName == "A") return;
+                el = el.parentElement;
+            }
+            window.open(url, "_blank");
         };
 
         const postPartial = (post: BskyThreadPost, isQuote = false) => {
@@ -730,7 +748,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
             return html`
                 <div
                     class="cursor-pointer flex flex-col post min-w-[280px] hover:bg-gray/20 py-2"
-                    @click=${() => openPost(`https://bsky.app/profile/${author.did}/post/${uri.replace("at://", "").split("/")[2]}`)}
+                    @click=${(ev: Event) => openPost(ev, `https://bsky.app/profile/${author.did}/post/${uri.replace("at://", "").split("/")[2]}`)}
                 >
                     <div class="${isQuote ? "italic" : ""}">${unsafeHTML(processText(record))}</div>
                     ${images ? html`<div class="mt-2">${images}</div>` : nothing}
@@ -751,11 +769,14 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
 
         const postDom = dom(html`<div class="mt-4">
             <div class="flex items-center gap-2 mb-2">
-                <a class="flex items-center gap-2" href="https://bsky.app/profile/${author.handle}">
+                <a class="flex items-center gap-2" href="https://bsky.app/profile/${author.handle}" target="_blank">
                     ${author.avatar ? html`<img class="w-[2em] h-[2em] rounded-full" src="${author.avatar}" />` : this.defaultAvatar}
                     <span class="text-primary">${author.displayName}</span>
                 </a>
-                <a class="text-xs text-primary/75" href="https://bsky.app/profile/${author.did}/post/${uri.replace("at://", "").split("/")[2]}"
+                <a
+                    class="text-xs text-primary/75"
+                    href="https://bsky.app/profile/${author.did}/post/${uri.replace("at://", "").split("/")[2]}"
+                    target="_blank"
                     >${getTimeDifferenceString(post.post.record.createdAt)}</a
                 >
             </div>
