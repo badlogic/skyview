@@ -582,7 +582,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                             or blog to embed the post.
                             <a
                                 class="text-primary"
-                                href="http://localhost:8080/?url=https%3A%2F%2Fbsky.app%2Fprofile%2Fbadlogic.bsky.social%2Fpost%2F3kbshkdcqdz2h&viewtype=embed"
+                                href="?url=https%3A%2F%2Fbsky.app%2Fprofile%2Fbadlogic.bsky.social%2Fpost%2F3kbshkdcqdz2h&viewtype=embed"
                                 >Example</a
                             >
                         </div>
