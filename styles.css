@@ -11,4 +11,7 @@
     .hidden {
         display: none;
     }
+    i > svg {
+        @apply w-full h-full;
+    }
 }

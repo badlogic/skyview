@@ -444,6 +444,11 @@ html,
   display: none;
 }
 
+i > svg {
+  height: 100%;
+  width: 100%;
+}
+
 *, ::before, ::after {
   --tw-border-spacing-x: 0;
   --tw-border-spacing-y: 0;
@@ -618,6 +623,14 @@ html,
   left: 0.25rem;
 }
 
+.right-0 {
+  right: 0px;
+}
+
+.top-0 {
+  top: 0px;
+}
+
 .isolate {
   isolation: isolate;
 }
@@ -742,6 +755,10 @@ html,
   height: 0.5rem;
 }
 
+.h-\[1\.2em\] {
+  height: 1.2em;
+}
+
 .h-\[2em\] {
   height: 2em;
 }
@@ -758,12 +775,16 @@ html,
   max-height: 70vh;
 }
 
-.\!w-\[6\.5em\] {
-  width: 6.5em !important;
+.\!w-\[240px\] {
+  width: 240px !important;
 }
 
 .w-10 {
   width: 2.5rem;
+}
+
+.w-\[1\.2m\] {
+  width: 1.2m;
 }
 
 .w-\[2em\] {
@@ -972,6 +993,10 @@ html,
   border-color: rgb(85 85 85 / var(--tw-border-opacity));
 }
 
+.border-gray\/30 {
+  border-color: rgb(85 85 85 / 0.3);
+}
+
 .border-gray\/50 {
   border-color: rgb(85 85 85 / 0.5);
 }
@@ -985,6 +1010,11 @@ html,
   border-color: rgb(204 125 36 / var(--tw-border-opacity));
 }
 
+.border-white {
+  --tw-border-opacity: 1;
+  border-color: rgb(255 255 255 / var(--tw-border-opacity));
+}
+
 .bg-black {
   --tw-bg-opacity: 1;
   background-color: rgb(0 0 0 / var(--tw-bg-opacity));
@@ -995,6 +1025,14 @@ html,
   background-color: rgb(85 85 85 / var(--tw-bg-opacity));
 }
 
+.bg-gray\/30 {
+  background-color: rgb(85 85 85 / 0.3);
+}
+
+.bg-gray\/50 {
+  background-color: rgb(85 85 85 / 0.5);
+}
+
 .bg-primary {
   --tw-bg-opacity: 1;
   background-color: rgb(204 125 36 / var(--tw-bg-opacity));
@@ -1003,6 +1041,14 @@ html,
 .bg-white {
   --tw-bg-opacity: 1;
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
+}
+
+.bg-none {
+  background-image: none;
+}
+
+.fill-primary {
+  fill: #cc7d24;
 }
 
 .\!object-cover {
@@ -1212,4 +1258,24 @@ html,
 
 .hover\:bg-gray\/20:hover {
   background-color: rgb(85 85 85 / 0.2);
+}
+
+:is(.dark .dark\:border-gray) {
+  --tw-border-opacity: 1;
+  border-color: rgb(85 85 85 / var(--tw-border-opacity));
+}
+
+:is(.dark .dark\:bg-black) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(0 0 0 / var(--tw-bg-opacity));
+}
+
+:is(.dark .dark\:bg-gray) {
+  --tw-bg-opacity: 1;
+  background-color: rgb(85 85 85 / var(--tw-bg-opacity));
+}
+
+:is(.dark .dark\:text-white) {
+  --tw-text-opacity: 1;
+  color: rgb(255 255 255 / var(--tw-text-opacity));
 }

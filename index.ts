@@ -1,4 +1,4 @@
-import { LitElement, PropertyValueMap, TemplateResult, html, nothing, render, svg } from "lit";
+import { LitElement, PropertyValueMap, TemplateResult, css, html, nothing, render, svg } from "lit";
 import { customElement, property, query, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 import { globalStyles } from "./styles";
@@ -215,10 +215,10 @@ function renderCard(card: BskyExternalCard) {
     return html` <a href="${card.uri}" class="inline-block w-full border border-gray/50 rounded mt-2" target="_blank">
         <div class="flex">
             ${card.thumb
-                ? html`<div class="flex-none"><img src="${card.thumb}" class="!w-[6.5em] !max-h-full !h-full !object-cover !rounded-r-none" /></div>`
+                ? html`<div><img src="${card.thumb}" class="!w-[240px] !max-h-full !h-full !object-cover !rounded-r-none" /></div>`
                 : nothing}
-            <div class="flex flex-col overflow-hidden text-ellipsis p-4">
-                <span class="font-bold text-sm text-color text-ellipsis overflow-hidden">${card.title ? card.title : card.uri}</span>
+            <div class="flex flex-col p-4 overflow-hidden">
+                <span class="font-bold text-sm text-color">${card.title ? card.title : card.uri}</span>
                 <span class="py-2 text-color text-sm text-ellipsis overflow-hidden">${card.description.split("\n")[0]}</span>
                 <span class="text-xs text-color/50 text-ellipsis overflow-hidden">${new URL(card.uri).host}</span>
             </div>
@@ -305,20 +305,67 @@ type BskyThreadPost = {
 };
 
 const contentLoader = html`<div class="flex space-x-4 animate-pulse w-[80%] max-w-[300px] m-auto py-4">
-    <div class="rounded-full bg-gray h-10 w-10"></div>
+    <div class="rounded-full bg-gray/50 dark:bg-gray h-10 w-10"></div>
     <div class="flex-1 space-y-6 py-1">
-        <div class="h-2 bg-gray rounded"></div>
+        <div class="h-2 bg-gray/50 dark:bg-gray rounded"></div>
         <div class="space-y-3">
             <div class="grid grid-cols-3 gap-4">
-                <div class="h-2 bg-gray rounded col-span-2"></div>
-                <div class="h-2 bg-gray rounded col-span-1"></div>
+                <div class="h-2 bg-gray/50 dark:bg-gray rounded col-span-2"></div>
+                <div class="h-2 bg-gray/50 dark:bg-gray rounded col-span-1"></div>
             </div>
-            <div class="h-2 bg-gray rounded"></div>
+            <div class="h-2 bg-gray/50 dark:bg-gray rounded"></div>
         </div>
     </div>
 </div>`;
 
 type ViewType = "tree" | "embed" | "unroll";
+
+// @ts-ignore
+import sunIconSvg from "remixicon/icons/Weather/sun-line.svg";
+// @ts-ignore
+import moonIconSvg from "remixicon/icons/Weather/moon-line.svg";
+
+function icon(svg: string) {
+    return html`<i class="flex w-[1.2m] h-[1.2em] border-white fill-primary">${unsafeHTML(svg)}</i>`;
+}
+
+@customElement("theme-toggle")
+class ThemeToggle extends LitElement {
+    static style = [globalStyles];
+
+    @state()
+    theme = "dark";
+
+    protected createRenderRoot(): Element | ShadowRoot {
+        return this;
+    }
+
+    connectedCallback(): void {
+        super.connectedCallback();
+        this.theme = localStorage.getItem("theme") ?? "dark";
+        this.setTheme(this.theme);
+    }
+
+    setTheme(theme: string) {
+        localStorage.setItem("theme", theme);
+        if (theme == "dark") document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+    }
+
+    toggleTheme() {
+        this.theme = this.theme == "dark" ? "light" : "dark";
+        this.setTheme(this.theme);
+    }
+
+    render() {
+        const moonIcon = icon(moonIconSvg);
+        const sunIcon = icon(sunIconSvg);
+
+        return html`<button class="absolute top-0 right-0 p-4 fill-primary" @click=${this.toggleTheme}>
+            ${this.theme == "dark" ? moonIcon : sunIcon}
+        </button>`;
+    }
+}
 
 @customElement("skyview-app")
 class App extends LitElement {
@@ -343,7 +390,10 @@ class App extends LitElement {
     originalUri?: string;
 
     @state()
-    copiedToClipboard = false;
+    copiedLink = false;
+
+    @state()
+    copiedCode = false;
 
     viewType: ViewType = "tree";
 
@@ -364,6 +414,10 @@ class App extends LitElement {
             if (this.url) this.load();
             this.firstUpdate = false;
         }
+    }
+
+    protected createRenderRoot(): Element | ShadowRoot {
+        return this;
     }
 
     async load() {
@@ -454,7 +508,12 @@ class App extends LitElement {
                 posts.push(this.thread);
                 while (true) {
                     const post = posts[posts.length - 1];
-                    const next = post.replies.find((reply) => reply.post.author.did == post.post.author.did);
+                    const next = post.replies.find(
+                        (reply) =>
+                            reply.post.author.did == post.post.author.did &&
+                            !reply.post.record.text.includes("@skyview.social") &&
+                            !reply.post.record.text.includes("unroll")
+                    );
                     if (!next) break;
                     posts.push(next);
                 }
@@ -486,7 +545,7 @@ class App extends LitElement {
         } else if (this.thread) {
             content = html` ${!this.embed
                 ? html`<div class="mb-4 font-bold text-primary text-center cursor-pointer" @click=${() => this.copyToClipboard(location.href)}>
-                          ${this.copiedToClipboard ? "Copied link to clipboard" : "Share"}
+                          ${this.copiedLink ? "Copied link to clipboard" : "Share"}
                       </div>
                       <radio-button-group
                           class="mx-auto"
@@ -497,7 +556,9 @@ class App extends LitElement {
                       ></radio-button-group>
                       ${this.viewType == "embed"
                           ? html`<div class="text-center mt-4">Use this HTML code on your website, blog, etc. to embed the post below.</div>
-                                <div class="bg-gray rounded border border-gray text-white text-sm overflow-auto font-mono my-4 p-4">
+                                <div
+                                    class="bg-gray/30 dark:bg-gray dark:text-white rounded border border-gray/30 dark:border-gray text-sm overflow-auto font-mono my-4 p-4"
+                                >
                                     <pre>
 &lt;iframe
 src=&quot;${location.protocol}//${location.host}/embed.html?url=${this.url}&quot;
@@ -508,10 +569,11 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                                         class="text-white bg-primary px-4 py-2 mt-2 rounded"
                                         @click=${() =>
                                             this.copyToClipboard(
-                                                `<iframe src="${location.protocol}//${location.host}/embed.html?url=${this.url}" style="border: none; outline: none; width: 400px; height: 600px;"></iframe>`
+                                                `<iframe src="${location.protocol}//${location.host}/embed.html?url=${this.url}" style="border: none; outline: none; width: 400px; height: 600px;"></iframe>`,
+                                                "code"
                                             )}
                                     >
-                                        Copy
+                                        ${this.copiedCode ? "Copied!" : "Copy"}
                                     </button>
                                 </div>`
                           : nothing} `
@@ -527,7 +589,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                 <div class="flex mt-4">
                     <input
                         id="url"
-                        class="flex-1 bg-black border border-gray/75 outline-none rounded-l px-2 py-2"
+                        class="flex-1 bg-none border-l border-t border-b border-gray/75 outline-none rounded-l px-2 py-2"
                         placeholder="URL of a BlueSky post"
                     />
                     <button class="align-center rounded-r bg-primary text-white px-4" @click=${this.viewPosts}>View</button>
@@ -785,7 +847,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
         return postDom;
     }
 
-    copyToClipboard(text: string) {
+    copyToClipboard(text: string, label: "link" | "code" = "link") {
         const input = document.createElement("input");
         input.value = text;
 
@@ -794,9 +856,11 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
 
         try {
             document.execCommand("copy");
-            this.copiedToClipboard = true;
+            if (label == "link") this.copiedLink = true;
+            if (label == "code") this.copiedCode = true;
         } catch (err) {
-            this.copiedToClipboard = false;
+            if (label == "link") this.copiedLink = false;
+            if (label == "code") this.copiedCode = false;
         } finally {
             document.body.removeChild(input);
         }
