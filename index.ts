@@ -374,7 +374,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                 <div class="flex mt-4">
                     <input
                         id="url"
-                        class="flex-1 bg-none border-l border-t border-b border-gray/75 outline-none rounded-l px-2 py-2"
+                        class="flex-1 bg-none border-l border-t border-b border-gray/75 outline-none rounded-l text-black px-2 py-2"
                         placeholder="URL of a BlueSky post"
                     />
                     <button class="align-center rounded-r bg-primary text-white px-4" @click=${this.viewPosts}>View</button>
@@ -383,8 +383,8 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                 <div class="flex flex-col gap-4">
                     <div class="mb-4">
                         Reply anywhere in a BlueSky thread and mention
-                        <a href="https://bsky.app/profile/skyview.social" target="_blank">@skyview.social</a> using one of the following commands. The
-                        Skyview bot will reply to you with a link, which shows the BlueSky thread depending on your command.
+                        <a class="text-primary" href="https://bsky.app/profile/skyview.social" target="_blank">@skyview.social</a> using one of the
+                        following commands. The Skyview bot will reply to you with a link, which shows the BlueSky thread depending on your command.
                     </div>
                     <div class="flex flex-col gap-2">
                         <div>
@@ -436,7 +436,6 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                 <div>1. Open a post in the BlueSky app or on the BlueSky website</div>
                 <div>2. Click the three dots</div>
                 <div>3. Click "Share" and copy the URL</div>
-                <img class="rounded border border-gray/50 m-2" src="tutorial.png" />
                 <div>4. Paste the URL into the text field above and click "View"</div>
                 <div>5. Set your preferred viewing type ("tree", "embed", "unroll") and share it by clicking "Share"</div>
 

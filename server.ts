@@ -15,6 +15,11 @@ if (!indexTemplate) {
     console.error("Couldn't read index.html");
     process.exit(-1);
 }
+const embedTemplate = fs.readFileSync("index.html").toString();
+if (!embedTemplate) {
+    console.error("Couldn't read embed.html");
+    process.exit(-1);
+}
 
 console.log(`BlueSky account: ${blueskyAccount}`);
 console.log(`BlueSky key: ${blueskyKey}`);
@@ -52,17 +57,14 @@ console.log(`BlueSky key: ${blueskyKey}`);
     app.use(cors());
     app.use(compression());
 
-    const metaCache = new Map<string, string>();
-    app.get("/", async (req, res) => {
-        res.setHeader("Content-Type", "text/html");
+    const getMeta = async (url: string, originalUrl: string, viewType: ViewType): Promise<string> => {
         let meta = `
         <meta property="og:title" content="Skyview" />
         <meta property="og:type" content="website" />
         <meta property="og:description" content="Share BlueSky posts and threads externally" />
         <meta property="og:url" content="https://skyview.social" />
         <meta name="twitter:card" content="summary_large_image" />`;
-        const url = req.query.url as string;
-        const viewType = (req.query.viewtype as ViewType) ?? "tree";
+
         if (url) {
             const cacheKey = url + "|" + viewType;
             console.log("Generating meta for : " + cacheKey);
@@ -74,15 +76,24 @@ console.log(`BlueSky key: ${blueskyKey}`);
                     const result = await loadThread(url, viewType);
                     if (typeof result != "string") {
                         const name = result.thread.post.author.displayName ?? result.thread.post.author.handle;
+                        const title = `A BlueSky ${viewType == "embed" ? "post" : "thread"} by ${name} on Skyview`;
                         const text = result.thread.post.record.text;
                         const avatar = result.thread.post.author.avatar;
+                        const url = "https://skyview.social" + originalUrl;
                         meta = `
-                            <meta property="og:title" content="A BlueSky ${viewType == "embed" ? "post" : "thread"} by ${name}" />
+                            <title>${title}</title>
+                            <meta name="description" content="${text}">
+                            <meta property="og:title" content="${title}" />
                             <meta property="og:type" content="article" />
                             <meta property="og:description" content="${text}" />
                             ${avatar ? `<meta property="og:image" content="${avatar}" />` : ""}
-                            <meta property="og:url" content="${"https://skyview.social" + req.originalUrl}" />
-                            <meta name="twitter:card" content="summary_large_image" />
+                            <meta property="og:url" content="${url}" />
+                            <meta name="twitter:card" content="summary_large_image">
+                            <meta property="twitter:domain" content="skyview.social">
+                            <meta property="twitter:url" content="${url}">
+                            <meta name="twitter:title" content="${title}">
+                            <meta name="twitter:description" content="${text}">
+                            ${avatar ? `<meta name="twitter:image" content="${avatar}">` : ""}
                         `;
                         console.log("Setting meta cache entry for " + cacheKey);
                         metaCache.set(cacheKey, meta);
@@ -92,7 +103,21 @@ console.log(`BlueSky key: ${blueskyKey}`);
                 }
             }
         }
-        res.status(200).send(indexTemplate.replace("<!-- meta -->", meta));
+        return meta;
+    };
+
+    const metaCache = new Map<string, string>();
+    app.get("/", async (req, res) => {
+        res.setHeader("Content-Type", "text/html");
+        const url = req.query.url as string;
+        const viewType = (req.query.viewtype as ViewType) ?? "tree";
+        res.status(200).send(indexTemplate.replace("<!-- meta -->", await getMeta(url, req.originalUrl, viewType)));
+    });
+    app.get("/embed.html", async (req, res) => {
+        res.setHeader("Content-Type", "text/html");
+        const url = req.query.url as string;
+        const viewType = "embed";
+        res.status(200).send(embedTemplate.replace("<!-- meta -->", await getMeta(url, req.originalUrl, viewType)));
     });
     app.use(express.static("./"));
 
