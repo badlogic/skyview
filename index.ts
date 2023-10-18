@@ -3,11 +3,6 @@ import { customElement, property, query, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 import { globalStyles } from "./styles";
 import { map } from "lit-html/directives/map.js";
-// @ts-ignore
-import { Agent } from "@intrnl/bluesky-client/agent";
-// @ts-ignore
-import type { DID } from "@intrnl/bluesky-client/atp-schema";
-import { RichText } from "@atproto/api";
 
 function getTimeDifferenceString(inputDate: string): string {
     const currentDate = new Date();
@@ -31,45 +26,6 @@ function getTimeDifferenceString(inputDate: string): string {
     } else {
         return `${seconds}s`;
     }
-}
-
-function replaceHandles(text: string): string {
-    const handleRegex = /@([\p{L}_.-]+)/gu;
-    const replacedText = text.replace(handleRegex, (match, handle) => {
-        return `<a class="text-primary" href="https://bsky.app/profile/${handle}" target="_blank">@${handle}</a>`;
-    });
-
-    return replacedText;
-}
-
-function applyFacets(record: BskyRecord) {
-    if (!record.facets) {
-        return record.text;
-    }
-
-    const rt = new RichText({
-        text: record.text,
-        facets: record.facets as any,
-    });
-
-    const text: string[] = [];
-
-    for (const segment of rt.segments()) {
-        if (segment.isMention()) {
-            text.push(`<a class="text-primary" href="https:///profile/${segment.mention?.did}" target="_blank">${segment.text}</a>`);
-        } else if (segment.isLink()) {
-            text.push(`<a class="text-primary" href="${segment.link?.uri}" target="_blank">${segment.text}</a>`);
-        } else if (segment.isTag()) {
-            text.push(`<span class="text-blue-500">${segment.text}</span>`);
-        } else {
-            text.push(segment.text);
-        }
-    }
-    const result = text.join("");
-    return result;
-}
-function processText(record: BskyRecord) {
-    return replaceHandles(applyFacets(record)).trim().replaceAll("\n", "<br/>");
 }
 
 @customElement("radio-button-group")
@@ -226,84 +182,6 @@ function renderCard(card: BskyExternalCard) {
     </a>`;
 }
 
-const agent = new Agent({ serviceUri: "https://api.bsky.app" });
-
-type BskyAuthor = {
-    did: string;
-    avatar?: string;
-    displayName: string;
-    handle?: string;
-};
-
-type BskyFacet = {
-    features: { uri?: string; tag?: string }[];
-    index: { byteStart: number; byteEnd: number };
-};
-
-type BskyRecord = {
-    createdAt: string;
-    text: string;
-    facets?: BskyFacet[];
-};
-
-type BskyImage = {
-    thumb: string;
-    fullsize: string;
-    alt: string;
-    aspectRatio?: {
-        width: number;
-        height: number;
-    };
-};
-
-type BskyViewRecord = {
-    $type: "app.bsky.embed.record#viewRecord";
-    uri: string;
-    cid: string;
-    author: BskyAuthor;
-    value?: BskyRecord;
-    embeds: {
-        media?: { images: BskyImage[] };
-        images?: BskyImage[];
-        external?: BskyExternalCard;
-        record?: BskyViewRecord | BskyViewRecordWithMedia;
-    }[];
-};
-
-type BskyViewRecordWithMedia = {
-    $type: "app.bsky.embed.record_with_media#viewRecord";
-    record: BskyViewRecord;
-};
-
-type BskyExternalCard = {
-    uri: string;
-    title: string;
-    description: string;
-    thumb?: string;
-};
-
-type BskyPost = {
-    uri: string;
-    cid: string;
-    author: BskyAuthor;
-    record: BskyRecord;
-    embed?: {
-        media?: { images: BskyImage[] };
-        images?: BskyImage[];
-        external?: BskyExternalCard;
-        record?: BskyViewRecord | BskyViewRecordWithMedia;
-    };
-    likeCount: number;
-    replyCount: number;
-    repostCount: number;
-};
-
-type BskyThreadPost = {
-    parent?: BskyThreadPost;
-    post: BskyPost;
-    replies: BskyThreadPost[];
-};
-
 const contentLoader = html`<div class="flex space-x-4 animate-pulse w-[80%] max-w-[300px] m-auto py-4">
     <div class="rounded-full bg-gray/50 dark:bg-gray h-10 w-10"></div>
     <div class="flex-1 space-y-6 py-1">
@@ -318,12 +196,11 @@ const contentLoader = html`<div class="flex space-x-4 animate-pulse w-[80%] max-
     </div>
 </div>`;
 
-type ViewType = "tree" | "embed" | "unroll";
-
 // @ts-ignore
 import sunIconSvg from "remixicon/icons/Weather/sun-line.svg";
 // @ts-ignore
 import moonIconSvg from "remixicon/icons/Weather/moon-line.svg";
+import { BskyAuthor, BskyExternalCard, BskyImage, BskyRecord, BskyThreadPost, ViewType, loadThread, processText } from "./bsky";
 
 function icon(svg: string) {
     return html`<i class="flex w-[1.2m] h-[1.2em] border-white fill-primary">${unsafeHTML(svg)}</i>`;
@@ -429,105 +306,13 @@ class App extends LitElement {
         this.loading = true;
         this.originalUri = undefined;
         try {
-            const tokens = this.url.replace("https://", "").split("/");
-            const actor = tokens[2];
-            let rkey = tokens[4];
-            if (!actor || !rkey) {
-                this.error = "Sorry, couldn't load thread (invalid URL)";
-                return;
-            }
-            let did: DID;
-            if (actor.startsWith("did:")) {
-                did = actor as DID;
+            const result = await loadThread(this.url, this.viewType);
+            if (typeof result == "string") {
+                this.error = result;
             } else {
-                const response = await agent.rpc.get("com.atproto.identity.resolveHandle", {
-                    params: {
-                        handle: actor,
-                    },
-                });
-
-                if (!response.success) {
-                    this.error = "Sorry, couldn't load thread (invalid handle)";
-                    return;
-                }
-                did = response.data.did;
+                this.thread = result.thread;
+                this.originalUri = result.originalUri;
             }
-
-            this.originalUri = `at://${did}/app.bsky.feed.post/${rkey}`;
-            let response: any | null = null;
-            do {
-                response = await agent.rpc.get("app.bsky.feed.getPostThread", {
-                    params: {
-                        uri: `at://${did}/app.bsky.feed.post/${rkey}`,
-                        parentHeight: 1,
-                        depth: 100,
-                    },
-                });
-
-                if (!response) {
-                    this.error = "sorry, couldn't load thread (empty response)";
-                    return;
-                }
-
-                if (!response.success) {
-                    this.error = "Sorry, couldn't load thread (invalid response)";
-                    return;
-                }
-
-                if (!response.data.thread) {
-                    this.error = "Sorry, couldn't load thread (invalid data)";
-                    return;
-                }
-
-                if (response.data.thread.parent && this.viewType != "embed") {
-                    const tokens = response.data.thread.parent.post.uri.replace("at://", "").split("/");
-                    did = tokens[0];
-                    rkey = tokens[2];
-                    response = null;
-                }
-            } while (!response);
-
-            this.thread = response.data.thread;
-            if (!this.thread) {
-                this.error = "Sorry, couldn't load thread (invalid thread)";
-                return;
-            }
-            if (this.viewType == "embed") {
-                if (
-                    this.thread.post.record.text.includes("@skyview.social") &&
-                    this.thread.post.record.text.includes("embed") &&
-                    this.thread.parent
-                ) {
-                    this.thread = this.thread.parent;
-                }
-                this.thread.replies = [];
-            }
-
-            if (this.viewType == "unroll") {
-                const posts: BskyThreadPost[] = [];
-                posts.push(this.thread);
-                while (true) {
-                    const post = posts[posts.length - 1];
-                    const next = post.replies.find(
-                        (reply) =>
-                            reply.post.author.did == post.post.author.did &&
-                            !reply.post.record.text.includes("@skyview.social") &&
-                            !reply.post.record.text.includes("unroll")
-                    );
-                    if (!next) break;
-                    posts.push(next);
-                }
-                this.thread.replies = posts.length > 1 ? posts.slice(1, posts.length) : [];
-                this.thread.replies.forEach((reply) => (reply.replies = []));
-                if (this.thread.replies.length > 0) {
-                    const lastPost = this.thread.replies[this.thread.replies.length - 1];
-                    if (lastPost.post.record.text.includes("@skyview.social") && lastPost.post.record.text.includes("unroll")) {
-                        this.thread.replies.pop();
-                    }
-                }
-            }
-
-            console.log(this.thread);
         } catch (e) {
             this.error = `Sorry, couldn't load thread (exception) ${(e as any).message ? "\n" + (e as any).message : ""}`;
             return;
