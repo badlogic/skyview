@@ -59,7 +59,6 @@ console.log(`BlueSky key: ${blueskyKey}`);
         <meta property="og:title" content="Skyview" />
         <meta property="og:type" content="website" />
         <meta property="og:description" content="Share BlueSky posts and threads externally" />
-        <!--<meta property="og:image" content="https://cards-for-ukraine.at/images/social-card.jpg" />-->
         <meta property="og:url" content="https://skyview.social" />
         <meta name="twitter:card" content="summary_large_image" />`;
         const url = req.query.url as string;
@@ -78,11 +77,11 @@ console.log(`BlueSky key: ${blueskyKey}`);
                         const text = result.thread.post.record.text;
                         const avatar = result.thread.post.author.avatar;
                         meta = `
-                            <meta property="og:title" content="A BlueSky thread by ${name}" />
+                            <meta property="og:title" content="A BlueSky ${viewType == "embed" ? "post" : "thread"} by ${name}" />
                             <meta property="og:type" content="article" />
                             <meta property="og:description" content="${text}" />
                             ${avatar ? `<meta property="og:image" content="${avatar}" />` : ""}
-                            <meta property="og:url" content="${req.originalUrl}" />
+                            <meta property="og:url" content="${"https://skyview.social" + req.originalUrl}" />
                             <meta name="twitter:card" content="summary_large_image" />
                         `;
                         console.log("Setting meta cache entry for " + cacheKey);
