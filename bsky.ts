@@ -155,6 +155,7 @@ export async function loadThread(url: string, viewType: ViewType): Promise<{ thr
             posts.push(thread);
             while (true) {
                 const post = posts[posts.length - 1];
+                post.replies.sort((a, b) => a.post.record.createdAt.localeCompare(b.post.record.createdAt));
                 const next = post.replies.find(
                     (reply) =>
                         reply.post.author.did == post.post.author.did &&

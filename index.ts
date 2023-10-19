@@ -482,8 +482,10 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
             <div class="text-center text-xs italic my-4 pb-4">
                 <a class="text-primary" href="https://skyview.social" target="_blank">Skyview</a> is lovingly made by
                 <a class="text-primary" href="https://bsky.app/profile/badlogic.bsky.social" target="_blank">Mario Zechner</a><br />
-                No data is collected, not even your IP address.
-                <a class="text-primary" href="https://github.com/badlogic/skyview" target="_blank"><br />Source code</a>
+                Kindly supported by <a class="text-primary" class="https://mediamask.io/">Mediamask</a>, the most amazing template engine for image
+                generation<br />
+                No data is collected, not even your IP address.<br />
+                <a class="text-primary" href="https://github.com/badlogic/skyview" target="_blank">Source code</a>
             </div>
         </main>`;
     }
