@@ -5,10 +5,23 @@ import * as fs from "fs";
 import cors from "cors";
 import { BskyBot, Events } from "easy-bsky-bot-sdk";
 import { ViewType, loadThread } from "./bsky";
+import { MediamaskApi, Configuration } from "mediamask-js";
 
 const port = process.env.PORT ?? 3333;
-const blueskyAccount = process.env.SKYVIEW_BLUESKY_ACCOUNT!;
-const blueskyKey = process.env.SKYVIEW_BLUESKY_PASSWORD!;
+const blueskyAccount = process.env.SKYVIEW_BLUESKY_ACCOUNT;
+const blueskyKey = process.env.SKYVIEW_BLUESKY_PASSWORD;
+const mediaMaskKey = process.env.SKYVIEW_MEDIAMASK_KEY;
+
+if (!blueskyAccount || !blueskyKey || !mediaMaskKey) {
+    console.error("Please specify SKYVIEW_BLUESKY_ACCOUNT, SKYVIEW_BLUESKY_PASSWORD, and SKYVIEW_MEDIAMASK_KEY via env vars.");
+    process.exit(-1);
+}
+
+const mediaMask = new MediamaskApi(
+    new Configuration({
+        accessToken: mediaMaskKey,
+    })
+);
 
 const indexTemplate = fs.readFileSync("index.html").toString();
 if (!indexTemplate) {
@@ -20,9 +33,11 @@ if (!embedTemplate) {
     console.error("Couldn't read embed.html");
     process.exit(-1);
 }
+const metaCache = new Map<string, string>();
 
 console.log(`BlueSky account: ${blueskyAccount}`);
 console.log(`BlueSky key: ${blueskyKey}`);
+console.log(`MediaMask key: ${mediaMaskKey}`);
 
 (async () => {
     BskyBot.setOwner({ handle: blueskyAccount, contact: "badlogicgames@gmail.com" });
@@ -78,8 +93,21 @@ console.log(`BlueSky key: ${blueskyKey}`);
                         const name = result.thread.post.author.displayName ?? result.thread.post.author.handle;
                         const title = `A BlueSky ${viewType == "embed" ? "post" : "thread"} by ${name} on Skyview`;
                         const text = result.thread.post.record.text;
-                        const avatar = result.thread.post.author.avatar;
                         const url = "https://skyview.social" + originalUrl;
+                        const avatar = result.thread.post.author.avatar;
+                        let twitterAvatar: string | undefined = undefined;
+                        try {
+                            twitterAvatar = avatar
+                                ? await mediaMask.createSignedUrl("e5ed7a04-9252-4fa2-92e3-200d7dbfa3a0", {
+                                      title: title,
+                                      description: text,
+                                      image: avatar,
+                                      url: url,
+                                  })
+                                : undefined;
+                        } catch (e) {
+                            console.error("Couldn't create twitter card image", (e as any).message);
+                        }
                         meta = `
                             <title>${title}</title>
                             <meta name="description" content="${text}">
@@ -93,7 +121,7 @@ console.log(`BlueSky key: ${blueskyKey}`);
                             <meta property="twitter:url" content="${url}">
                             <meta name="twitter:title" content="${title}">
                             <meta name="twitter:description" content="${text}">
-                            ${avatar ? `<meta name="twitter:image" content="${avatar}">` : ""}
+                            ${twitterAvatar ? `<meta name="twitter:image" content="${twitterAvatar}">` : ""}
                         `;
                         console.log("Setting meta cache entry for " + cacheKey);
                         metaCache.set(cacheKey, meta);
@@ -106,7 +134,6 @@ console.log(`BlueSky key: ${blueskyKey}`);
         return meta;
     };
 
-    const metaCache = new Map<string, string>();
     app.get("/", async (req, res) => {
         res.setHeader("Content-Type", "text/html");
         const url = req.query.url as string;

@@ -34,6 +34,7 @@
     "husky": "^8.0.3",
     "lit": "^2.8.0",
     "lit-html": "^2.8.0",
+    "mediamask-js": "^1.1.10",
     "remixicon": "^3.5.0"
   },
   "devDependencies": {
