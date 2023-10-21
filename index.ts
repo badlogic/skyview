@@ -516,7 +516,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
         return html`<div class="flex items-center gap-2">
                 <a class="flex items-center gap-2" href="https://bsky.app/profile/${author.handle ?? author.did}" target="_blank">
                     ${author.avatar ? html`<img class="w-[2em] h-[2em] rounded-full" src="${author.avatar}" />` : this.defaultAvatar}
-                    <span class="text-primary">${author.displayName}</span>
+                    <span class="text-primary">${author.displayName ?? author.handle}</span>
                 </a>
                 <a
                     class="text-xs text-primary/75"
@@ -619,7 +619,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
             <div class="flex items-center gap-2 mb-2">
                 <a class="flex items-center gap-2" href="https://bsky.app/profile/${author.handle}" target="_blank">
                     ${author.avatar ? html`<img class="w-[2em] h-[2em] rounded-full" src="${author.avatar}" />` : this.defaultAvatar}
-                    <span class="text-primary">${author.displayName}</span>
+                    <span class="text-primary">${author.displayName ?? author.handle}</span>
                 </a>
                 <a
                     class="text-xs text-primary/75"
