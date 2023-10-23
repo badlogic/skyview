@@ -763,6 +763,10 @@ i > svg {
   height: 2em;
 }
 
+.h-\[32px\] {
+  height: 32px;
+}
+
 .h-full {
   height: 100%;
 }
@@ -789,6 +793,10 @@ i > svg {
 
 .w-\[2em\] {
   width: 2em;
+}
+
+.w-\[32px\] {
+  width: 32px;
 }
 
 .w-\[350px\] {

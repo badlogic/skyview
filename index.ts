@@ -3,6 +3,8 @@ import { customElement, property, query, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit-html/directives/unsafe-html.js";
 import { globalStyles } from "./styles";
 import { map } from "lit-html/directives/map.js";
+// @ts-ignore
+import logoSvg from "./logo.svg";
 
 function getTimeDifferenceString(inputDate: string): string {
     const currentDate = new Date();
@@ -477,13 +479,18 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
         }
 
         return html`<main class="flex flex-col justify-between m-auto max-w-[728px] px-4 h-full">
-            ${!this.embed || this.loading ? html`<a class="text-2xl text-primary font-bold text-center my-8" href="/">Skyview</a>` : nothing}
+            ${!this.embed || this.loading
+                ? html`<a class="text-2xl flex align-center justify-center text-primary font-bold text-center my-8" href="/"
+                      ><i class="w-[32px] h-[32px] inline-block fill-primary">${unsafeHTML(logoSvg)}</i><span class="ml-2">Skyview</span></a
+                  >`
+                : nothing}
             <div class="flex-grow flex flex-col">${content}</div>
             <div class="text-center text-xs italic my-4 pb-4">
                 <a class="text-primary" href="https://skyview.social" target="_blank">Skyview</a> is lovingly made by
                 <a class="text-primary" href="https://bsky.app/profile/badlogic.bsky.social" target="_blank">Mario Zechner</a><br />
                 Kindly supported by <a class="text-primary" class="https://mediamask.io/">Mediamask</a>, the most amazing template engine for image
                 generation<br />
+                Logo by <a href="marknzeichn.at" class="text-primary">Jan Hax</a><br />
                 No data is collected, not even your IP address.<br />
                 <a class="text-primary" href="https://github.com/badlogic/skyview" target="_blank">Source code</a>
             </div>
