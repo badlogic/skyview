@@ -28,7 +28,7 @@ if (!indexTemplate) {
     console.error("Couldn't read index.html");
     process.exit(-1);
 }
-const embedTemplate = fs.readFileSync("index.html").toString();
+const embedTemplate = fs.readFileSync("embed.html").toString();
 if (!embedTemplate) {
     console.error("Couldn't read embed.html");
     process.exit(-1);
