@@ -561,7 +561,7 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
                     : nothing}
                 ${card ? card : nothing}
             </div>
-            ${post.replies.length > 0
+            ${post.replies?.length > 0
                 ? html`<div class="border-l border-dotted border-gray/50 pl-4">
                       ${map(post.replies, (reply) => this.postPartial(reply, originalUri))}
                   </div>`
