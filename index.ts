@@ -482,7 +482,9 @@ style=&quot;border: none; outline: none; width: 400px; height: 600px&quot;
             ${!this.embed || this.loading
                 ? html`<a class="text-2xl flex align-center justify-center text-primary font-bold text-center my-8" href="/"
                       ><i class="w-[32px] h-[32px] inline-block fill-primary">${unsafeHTML(logoSvg)}</i><span class="ml-2">Skyview</span></a
-                  >`
+                  >
+                  <span class="text-sm text-center mb-12">Entertained? Consider donating to our <a class="text-primary" target="_blank" href="https://bsky.app/profile/badlogic.bsky.social/post/3lazjayqwfk2q">🇺🇦 charity</a></span>
+                  `
                 : nothing}
             <div class="flex-grow flex flex-col">${content}</div>
             <div class="text-center text-xs italic my-4 pb-4">
