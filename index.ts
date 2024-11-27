@@ -90,9 +90,9 @@ class Popup extends LitElement {
 
     protected render(): TemplateResult {
         return html`<div class="relative">
-            <div @click=${() => (this.show = !this.show)} class="rounded bg-black p-1 text-xs">${this.buttonText}</div>
+            <div @click=${() => (this.show = !this.show)} class="rounded bg-black text-white p-1 text-xs">${this.buttonText}</div>
             ${this.show
-                ? html`<div @click=${() => (this.show = !this.show)} class="absolute bg-black p-4 rounded border border-gray/50">
+                ? html`<div @click=${() => (this.show = !this.show)} class="absolute bg-black text-white p-4 z-[100] rounded border border-gray/50">
                       <slot></slot>
                   </div>`
                 : nothing}
@@ -124,7 +124,7 @@ function renderGallery(images: BskyImage[], expandGallery = true): HTMLElement {
                         <img class="max-h-[70vh] border border-none rounded" src="${img.thumb}" alt="${img.alt}" ) />
                         ${img.alt && img.alt.length > 0
                             ? html`<skyview-popup buttonText="ALT" text="${img.alt}" class="absolute left-1 bottom-1 cursor-pointer">
-                                  <div class="w-[350px]">${img.alt}</div>
+                                  <div class="w-[350px] text-white">${img.alt}</div>
                               </skyview-popup>`
                             : nothing}
                     </div>

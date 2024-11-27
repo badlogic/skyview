@@ -228,7 +228,6 @@ export async function loadThread(url: string, viewType: ViewType): Promise<{ thr
                     thread.replies.pop();
                 }
             }
-            thread.replies.forEach((reply) => console.log("\n" + reply.post.record.createdAt + " " + (reply.post.author.displayName ?? reply.post.author.handle ) + ": " + reply.post.record?.text))
         }
 
         return { thread, originalUri };
