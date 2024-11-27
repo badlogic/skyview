@@ -84,6 +84,86 @@ export type BskyThreadPost = {
 
 export type ViewType = "tree" | "embed" | "unroll";
 
+export async function collectFullThread(postUri: string) {
+    const seen = new Set<string>();
+    const threadCache = new Map<string, BskyThreadPost>();
+
+    async function getAndCacheThread(uri: string) {
+        const response = await agent.rpc.get("app.bsky.feed.getPostThread", {
+            params: {
+                uri,
+                parentHeight: 100,
+                depth: 100,
+            },
+        });
+
+        if (!response?.success || !response.data?.thread) {
+            throw new Error(`Failed to load thread for ${uri}`);
+        }
+
+        function cacheThreadPosts(thread: BskyThreadPost) {
+            if (!seen.has(thread.post.uri)) {
+                seen.add(thread.post.uri);
+                threadCache.set(thread.post.uri, thread);
+                thread.replies?.forEach(reply => cacheThreadPosts(reply));
+            }
+        }
+
+        cacheThreadPosts(response.data.thread);
+        return response.data.thread;
+    }
+
+    async function findRootPost(startUri: string): Promise<BskyThreadPost> {
+        let currentThread = threadCache.get(startUri) || await getAndCacheThread(startUri);
+
+        while (currentThread.parent) {
+            const parentUri = currentThread.parent.post.uri;
+            currentThread = threadCache.get(parentUri) || await getAndCacheThread(parentUri);
+        }
+
+        return currentThread;
+    }
+
+    async function processThreadBranch(post: BskyThreadPost): Promise<BskyThreadPost> {
+        if (!post.replies?.length && post.post.replyCount > 0) {
+            const freshData = await getAndCacheThread(post.post.uri);
+            if (freshData.replies?.length) {
+                post.replies = freshData.replies;
+            }
+        }
+
+        if (post.replies?.length) {
+            const fullReplies: BskyThreadPost[] = [];
+
+            for (const reply of post.replies) {
+                let fullReplyThread: BskyThreadPost;
+
+                if (threadCache.has(reply.post.uri)) {
+                    fullReplyThread = threadCache.get(reply.post.uri)!;
+                } else {
+                    fullReplyThread = await getAndCacheThread(reply.post.uri);
+                }
+
+                fullReplies.push(await processThreadBranch(fullReplyThread));
+            }
+
+            post.replies = fullReplies.sort((a, b) =>
+                a.post.record.createdAt.localeCompare(b.post.record.createdAt)
+            );
+        }
+
+        return post;
+    }
+
+    const rootPost = await findRootPost(postUri);
+    const fullThread = await processThreadBranch(rootPost);
+
+    return {
+        thread: fullThread,
+        rootUri: rootPost.post.uri
+    };
+}
+
 export async function loadThread(url: string, viewType: ViewType): Promise<{ thread: BskyThreadPost; originalUri: string | undefined } | string> {
     try {
         const tokens = url.replace("https://", "").split("/");
@@ -109,37 +189,8 @@ export async function loadThread(url: string, viewType: ViewType): Promise<{ thr
         }
 
         let originalUri = `at://${did}/app.bsky.feed.post/${rkey}`;
-        let response: any | null = null;
-        do {
-            response = await agent.rpc.get("app.bsky.feed.getPostThread", {
-                params: {
-                    uri: `at://${did}/app.bsky.feed.post/${rkey}`,
-                    parentHeight: 1,
-                    depth: 100,
-                },
-            });
+        let thread = (await collectFullThread(originalUri)).thread;
 
-            if (!response) {
-                return "sorry, couldn't load thread (empty response)";
-            }
-
-            if (!response.success) {
-                return "Sorry, couldn't load thread (invalid response)";
-            }
-
-            if (!response.data.thread) {
-                return "Sorry, couldn't load thread (invalid data)";
-            }
-
-            if (response.data.thread.parent && viewType != "embed") {
-                const tokens = response.data.thread.parent.post.uri.replace("at://", "").split("/");
-                did = tokens[0];
-                rkey = tokens[2];
-                response = null;
-            }
-        } while (!response);
-
-        let thread: BskyThreadPost = response.data.thread;
         if (!thread) {
             return "Sorry, couldn't load thread (invalid thread)";
         }
@@ -177,6 +228,7 @@ export async function loadThread(url: string, viewType: ViewType): Promise<{ thr
                     thread.replies.pop();
                 }
             }
+            thread.replies.forEach((reply) => console.log("\n" + reply.post.record.createdAt + " " + (reply.post.author.displayName ?? reply.post.author.handle ) + ": " + reply.post.record?.text))
         }
 
         return { thread, originalUri };
